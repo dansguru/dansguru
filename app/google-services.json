@@ -1,26 +1,45 @@
 {
   "project_info": {
-    "project_number": "111935616797",
-    "project_id": "sniffer-93c9a",
-    "storage_bucket": "sniffer-93c9a.appspot.com"
+    "project_number": "908685995208",
+    "firebase_url": "https://rentals-f282d-default-rtdb.firebaseio.com",
+    "project_id": "rentals-f282d",
+    "storage_bucket": "rentals-f282d.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:111935616797:android:aa1b4325993691099853f4",
+        "mobilesdk_app_id": "1:908685995208:android:cf99c94a2f490742efc9fd",
         "android_client_info": {
-          "package_name": "com.smile.sniffer"
+          "package_name": "com.smile.myapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "908685995208-lhonerf5lkh3kp5qg4ssnanhard8h8q0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smile.myapp",
+            "certificate_hash": "19d9942560db1a8a6f68fd6124b6330b9caa6867"
+          }
+        },
+        {
+          "client_id": "908685995208-p3a1igom8ne01rovrsmqldkh8bcmv52b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBS5gdoyxYL24H_tDwWV824c8_XUHEGWkQ"
+          "current_key": "AIzaSyBOpz0tvOc6mfiPEXKR7qrGEB3KCUZjBAc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "908685995208-p3a1igom8ne01rovrsmqldkh8bcmv52b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

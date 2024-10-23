@@ -1,5 +1,6 @@
 package com.smile.sniffer.screen
 
+import android.util.Base64
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,24 +15,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.smile.sniffer.R
 import com.smile.sniffer.model.Ticket
 import com.smile.sniffer.modules.ShimmerEffect
 import com.smile.sniffer.modules.TicketItem
 import com.smile.sniffer.mpesa.PhoneNumberDialog
-import com.smile.sniffer.mpesa.RetrofitClient
-import com.smile.sniffer.mpesa.StkPushRequest
-import com.smile.sniffer.mpesa.getAccessToken
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
-import android.util.Base64
 import com.smile.sniffer.api.FirestoreApiService
 import com.smile.sniffer.api.PictureData
 import com.smile.sniffer.modules.PictureItem
+import com.smile.sniffer.mpesa.RetrofitClient
+import com.smile.sniffer.mpesa.StkPushRequest
+import com.smile.sniffer.mpesa.getAccessToken
 import com.smile.sniffer.viewmodel.TicketCreationState
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -42,7 +41,6 @@ fun HomeScreen(
     val ticketCreationState by ticketViewModel.ticketCreationState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var picturesList by remember { mutableStateOf<List<PictureData>>(emptyList()) }
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
     var showDialog by remember { mutableStateOf(false) }
     var selectedTicket by remember { mutableStateOf<Ticket?>(null) }
     var isLoading by remember { mutableStateOf(true) } // To manage loading state
@@ -87,74 +85,61 @@ fun HomeScreen(
             contentScale = ContentScale.Crop
         )
 
-        SwipeRefresh(
-            state = swipeRefreshState,
-            onRefresh = {
-                coroutineScope.launch {
-                    ticketViewModel.loadTickets()
-                    val fetchedPictures = FirestoreApiService().fetchPicturesData()
-                    picturesList = fetchedPictures
-                    swipeRefreshState.isRefreshing = false
-                }
-            },
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize()
-            ) {
-                if (isLoading) {
-                    // Display shimmer effect while loading
-                    repeat(3) {
-                        ShimmerEffect()
-                        Spacer(modifier = Modifier.height(16.dp))
+            if (isLoading) {
+                // Display shimmer effect while loading
+                repeat(3) {
+                    ShimmerEffect()
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            } else {
+                when (ticketCreationState) {
+                    is TicketCreationState.Loading -> {
+                        // Display shimmer effect for tickets while loading
+                        repeat(3) {
+                            ShimmerEffect()
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
-                } else {
-                    when (ticketCreationState) {
-                        is TicketCreationState.Loading -> {
-                            // Display shimmer effect for tickets while loading
-                            repeat(3) {
-                                ShimmerEffect()
+                    is TicketCreationState.Error -> {
+                        Text(
+                            text = (ticketCreationState as TicketCreationState.Error).message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            // Display Ticket Items
+                            items(tickets) { ticket ->
+                                TicketItem(
+                                    ticket = ticket,
+                                    isLoading = false,
+                                    onClick = {},
+                                    onPaymentClick = {
+                                        selectedTicket = ticket
+                                        showDialog = true
+                                    }
+                                )
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
-                        }
-                        is TicketCreationState.Error -> {
-                            Text(
-                                text = (ticketCreationState as TicketCreationState.Error).message,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                        }
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                // Display Ticket Items
-                                items(tickets) { ticket ->
-                                    TicketItem(
-                                        ticket = ticket,
-                                        isLoading = false,
-                                        onClick = {},
-                                        onPaymentClick = {
-                                            selectedTicket = ticket
-                                            showDialog = true
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                }
 
-                                // Fetch and Display Picture Items
-                                items(picturesList) { pictureData ->
-                                    PictureItem(
-                                        imageUrl = pictureData.pictureUrl,
-                                        description = pictureData.expirationDateTime,
-                                        isLoading = isLoading,
-                                        expirationDateTime = pictureData.expirationDateTime
-                                    )
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                }
+                            // Fetch and Display Picture Items
+                            items(picturesList) { pictureData ->
+                                PictureItem(
+                                    imageUrl = pictureData.pictureUrl,
+                                    description = pictureData.expirationDateTime,
+                                    isLoading = isLoading,
+                                    expirationDateTime = pictureData.expirationDateTime
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
                         }
                     }
@@ -163,7 +148,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 
 

@@ -145,7 +145,6 @@ class FirestoreApiService {
 // In FirestoreApiService
 data class PictureData(
     val expirationDateTime: String = "",
-    val pictureUrl: String = ""
+    val pictureUrl: String = "",
+    val bitmap: Bitmap? = null // Add a nullable bitmap field
 )
-
-
